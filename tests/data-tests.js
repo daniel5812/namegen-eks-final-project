@@ -1,45 +1,51 @@
 'use strict';
-//require('dotenv').config({ path: '../.env' })
+
 const { faker } = require('@faker-js/faker');
 const {
-    setPerson, getPersons, getPerson,
+    setPerson,
+    getPersons,
+    getPerson,
+    deletePersons,
 } = require('../data/index');
-const {getConnection, getConnectionUrlSync} = require('../data/connection')
+
+const { getConnection } = require('../data/connection');
 const expect = require('chai').expect;
-const describe = require('mocha').describe;
-const it = require('mocha').it;
 
+describe('Data Tests', function () {
+    this.timeout(10000);
 
-
-
-describe('Data Tests', () => {
     before(async () => {
-
+        await getConnection();
+        await deletePersons();
     });
+
+    after(async () => {
+        const connection = await getConnection();
+        await connection.disconnect();
+    });
+
     it('Can connect to DB', async () => {
         const connection = await getConnection();
         expect(connection).to.be.an('object');
-        connection.disconnect();
-
-    }).timeout(5000);
+    });
 
     it('Can create Person to DB', async () => {
         const firstName = faker.name.firstName();
-        const lastName = faker.name.firstName();
+        const lastName = faker.name.lastName();
 
-        await setPerson({firstName,lastName})
-            .catch(e => {
-                console.error(e)
-            });
-        const persons = await getPersons()
+        const savedPerson = await setPerson({ firstName, lastName });
+
+        expect(savedPerson).to.be.an('object');
+        expect(savedPerson.firstName).to.eq(firstName);
+        expect(savedPerson.lastName).to.eq(lastName);
+
+        const persons = await getPersons();
         expect(persons).to.be.an('array');
-        const person = await getPerson(persons[0].id.toString())
-            .catch(e => {
-                console.error(e);
-            })
+        expect(persons.length).to.be.greaterThan(0);
+
+        const person = await getPerson(savedPerson.id.toString());
+
         expect(person).to.be.an('object');
-        expect(person.id).to.eq(persons[0].id.toString());
-
-    }).timeout(5000);
-
-})
+        expect(person.id).to.eq(savedPerson.id.toString());
+    });
+});

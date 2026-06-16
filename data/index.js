@@ -9,8 +9,9 @@ const setPerson = async (objPerson) => {
     const person = new Person();
     person.firstName = objPerson.firstName;
     person.lastName = objPerson.lastName;
-    await person.save();
+    const savedPerson = await person.save();
     logger.info({message: `Set person at ${new Date()}`});
+    return savedPerson;
     //await conn.connections[0].disconnect();
 };
 
