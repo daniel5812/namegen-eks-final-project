@@ -21,6 +21,12 @@ jobs:
     name: Build, Push to ECR, and Deploy to EKS
     runs-on: ubuntu-latest
 
+    services:
+      mongodb:
+        image: mongo:3.6
+        ports:
+          - 27017:27017
+
     steps:
       - name: Checkout source code
         uses: actions/checkout@v4
@@ -34,6 +40,8 @@ jobs:
         run: npm ci
 
       - name: Run tests
+        env:
+          MONGODB_URL: mongodb://localhost:27017/namegen
         run: npm test
 
       - name: Configure AWS credentials using OIDC
