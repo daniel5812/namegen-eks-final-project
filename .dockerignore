@@ -1,0 +1,9 @@
+node_modules
+npm-debug.log
+.git
+.github
+screenshots
+diagrams
+eksctl
+k8s
+.env
